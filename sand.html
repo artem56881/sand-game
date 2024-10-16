@@ -7,7 +7,7 @@
 	<style>
 		body {
             background-color: #3a3a3a;
-			font-family: 'Times New Roman', Times, serif;
+			font-family: 'Comic Sans', Times, serif;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
@@ -42,7 +42,7 @@
 	<canvas id="myCanvas" width="600" height="600"></canvas>
 	<div>
 		<button onclick="init()">random</button>
-		<button onclick="startSimulation()">Start</button>
+		<button onclick="reset()">reset</button>
 		<button onclick="nextGen()">Step</button>
 		<button onclick="stopSimulation()">Stop</button>
 	</div>
@@ -50,20 +50,21 @@
 	<p>New Sanding</p>
 
 	<div>
-		<input type="range" id="yInput" name="yInput" min="0" max="149" value="0" step="1" style="transform: rotate(90deg);" />
+		<input type="range" id="yInput" name="yInput" min="0" max="59" value="0" step="1" style="transform: rotate(90deg);" />
 		<label for="yInput">Y</label>
 
-		<input type="range" id="xInput" name="xInput" min="0" max="149" value="0" step="1" />
+		<input type="range" id="xInput" name="xInput" min="0" max="59" value="0" step="1" />
 		<label for="xInput">X</label>
 	</div>
 	<div>
 		<button onclick="spawn()">Spawn</button>
+		<button onclick="destroy()">Destroy</button>
 	</div>
 
     
 	<script>
-const fieldSize = 150;
-const celldSize = 4;
+const fieldSize = 60;
+const celldSize = 10;
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 let field = new Array(fieldSize);
@@ -71,7 +72,6 @@ let field = new Array(fieldSize);
 for(let i = 0; i < fieldSize; i++) {
 	field[i] = new Array(fieldSize).fill(0);
 }
-
 function nextGen() {
     let newField = JSON.parse(JSON.stringify(field));
 
@@ -104,8 +104,26 @@ function nextGen() {
     logir();
 }
 
+
+function doStep(){
+    nextGen(); // Call next generation step
+}
+
+function stopSimulation() {
+    clearInterval(timer);
+}
+
+function startSimulation() {
+    timer = setInterval(nextGen, 20);
+}
+startSimulation();
 function spawn(){
 	field[xInput.value][yInput.value] = 1;
+	draw();
+}
+
+function destroy(){
+	field[xInput.value][yInput.value] = 0;
 	draw();
 }
 
@@ -128,7 +146,11 @@ function draw() {
 		for(let j = 0; j < fieldSize; j++){
 
 			if (field[i][j] === 1) {
-				ctx.fillStyle = "#ff000F";
+				let red = (j * 255 / fieldSize) | 0;
+				let green = (i * 255 / fieldSize) | 0;
+				let blue = 150;
+
+				ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
 			}
 			else {
 				ctx.fillStyle = "#FFF";
@@ -151,17 +173,20 @@ function init() {
 	draw();
 }
 
+function reset() {
+    // Initialize the field with random or empty values
+	for(let i = 0; i < fieldSize; i++){
+		for(let j = 0; j < fieldSize; j++){
+			field[i][j] = 0;
+		}
+	}
+	draw();
+}
+
 function doStep(){
     nextGen(); // Call next generation step
 }
 
-function stopSimulation() {
-    clearInterval(timer);
-}
-
-function startSimulation() {
-    timer = setInterval(nextGen, 50);
-}
 
 // Draw initial field
 draw();
