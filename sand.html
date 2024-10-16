@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>sand</title>
+	<style>
+		body {
+            background-color: #3a3a3a;
+			font-family: 'Times New Roman', Times, serif;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			margin: 0;
+			padding: 20px;
+		}
+		h1 {
+			margin-bottom: 20px;
+			text-align: center;
+		}
+		canvas {
+			border: 1px solid #ccc;
+		}
+		button {
+			margin: 10px;
+			padding: 10px 20px;
+			font-size: 16px;
+			border: none;
+			border-radius: 5px;
+			background-color: #c9611d;
+			color: white;
+			cursor: pointer;
+			transition: background-color 0.1s;
+		}
+		button:hover {
+			background-color: #2a772a;
+		}
+	</style>
+</head>
+<body>
+	<h1>sand</h1>
+	<canvas id="myCanvas" width="600" height="600"></canvas>
+	<div>
+		<button onclick="init()">random</button>
+		<button onclick="startSimulation()">Start</button>
+		<button onclick="nextGen()">Step</button>
+		<button onclick="stopSimulation()">Stop</button>
+	</div>
+
+	<p>New Sanding</p>
+
+	<div>
+		<input type="range" id="yInput" name="yInput" min="0" max="149" value="0" step="1" style="transform: rotate(90deg);" />
+		<label for="yInput">Y</label>
+
+		<input type="range" id="xInput" name="xInput" min="0" max="149" value="0" step="1" />
+		<label for="xInput">X</label>
+	</div>
+	<div>
+		<button onclick="spawn()">Spawn</button>
+	</div>
+
+    
+	<script>
+const fieldSize = 150;
+const celldSize = 4;
+const canvas = document.getElementById("myCanvas");
+const ctx = canvas.getContext("2d");
+let field = new Array(fieldSize);
+
+for(let i = 0; i < fieldSize; i++) {
+	field[i] = new Array(fieldSize).fill(0);
+}
+
+function nextGen() {
+    let newField = JSON.parse(JSON.stringify(field));
+
+    for (let i = 0; i < fieldSize; i++) {
+        for (let j = 0; j < fieldSize; j++) {
+            if (field[i][j] === 1 && j < fieldSize - 1 && field[i][j+1] === 0) {
+                newField[i][j] = 0;
+                newField[i][j+1] = 1;
+            }
+			else {
+				let rand = Math.floor(Math.random() * 2);
+				if(rand === 0){
+					if (field[i][j] === 1 && i < fieldSize - 1 && field[i+1][j+1] === 0) {
+					newField[i][j] = 0;
+					newField[i+1][j+1] = 1;
+					}
+				}
+				else if (field[i][j] === 1 && i > 0 && field[i-1][j+1] === 0) {
+					newField[i][j] = 0;
+					newField[i-1][j+1] = 1;
+				}
+			}
+
+
+        }
+    }
+
+    field = newField;
+    draw();
+    logir();
+}
+
+function spawn(){
+	field[xInput.value][yInput.value] = 1;
+	draw();
+}
+
+function logir() {
+    let line = "";
+    console.log("log Start");
+
+    for(let i = 0; i < fieldSize; i++){
+        for(let j = 0; j < fieldSize; j++){
+            line += (field[i][j] === 1) ? "1" : "0";
+        }
+        console.log(line);
+        line = "";
+    }
+    console.log("log end");
+}
+
+function draw() {
+    for(let i = 0; i < fieldSize; i++){
+		for(let j = 0; j < fieldSize; j++){
+
+			if (field[i][j] === 1) {
+				ctx.fillStyle = "#ff000F";
+			}
+			else {
+				ctx.fillStyle = "#FFF";
+			}
+			ctx.fillRect(i * celldSize, j * celldSize, celldSize, celldSize);
+			ctx.fillStyle = "#626262";
+			ctx.fillRect(xInput.value * celldSize, yInput.value * celldSize, celldSize, celldSize);
+        }
+    }
+}
+
+function init() {
+    // Initialize the field with random or empty values
+	for(let i = 0; i < fieldSize; i++){
+		for(let j = 0; j < fieldSize; j++){
+			field[i][j] = field[i][j] + Math.floor(Math.random() * 2);
+			if(field[i][j] > 0) {field[i][j] = 1}
+		}
+	}
+	draw();
+}
+
+function doStep(){
+    nextGen(); // Call next generation step
+}
+
+function stopSimulation() {
+    clearInterval(timer);
+}
+
+function startSimulation() {
+    timer = setInterval(nextGen, 50);
+}
+
+// Draw initial field
+draw();
+
+	</script>
+</body>
+</html>
